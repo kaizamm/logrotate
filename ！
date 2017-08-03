@@ -1,0 +1,33 @@
+#!/usr/bin/env python
+#BGP-NETAM-01
+__author__ = "kaiz"
+
+import sys,os,requests,time
+
+cur_time = time.strftime('%Y-%m-%d-%H:%M',time.localtime(time.time()))
+if __name__ == "__main__":
+  session = requests.Session()
+  session.post('http://172.30.33.183:7991/login', json={
+    'username': 'Lkaiz',
+    'password': 'kaiz@123',
+    'eauth': 'pam',
+  })
+  try:
+    hostname = sys.argv[1]
+    resp = session.post('http://172.30.33.183:7991', json=[{
+      'client': 'local',
+      'tgt': hostname,
+      'fun': 'state.sls',
+      'arg': ['logrotate'],
+      #'kwarg': {"pillar":{"log_path":"/tmp/logs","bak_path_":"/tmp/log2","save_days":3}},
+    }])
+    a = resp.json()
+    with open("logrotate.log","w") as f:
+      f.write(str(a)+"\n")
+    print a
+  except Exception, e:
+    err = str(e)
+    err += cur_time 
+    print err
+    with open("logrotate_err.log","w") as f:
+      f.write(err)
